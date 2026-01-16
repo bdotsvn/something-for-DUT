@@ -94,6 +94,7 @@ void ShowFacultyMenu()
 {
     Console.WriteLine("1. List Students in Subject");
     Console.WriteLine("2. Update Student Grade");
+    Console.WriteLine("3. Import Grades from CSV");
 }
 
 void ShowStudentMenu(Student student)
@@ -179,6 +180,11 @@ void HandleFacultyChoice(string? choice)
             {
                 facultyService.UpdateStudentGrade(studId, subjId, score);
             }
+            break;
+        case "3":
+            Console.Write("Enter CSV path (format: StudentId,SubjectId,Score): ");
+            var path = Console.ReadLine();
+            if(path != null) facultyService.ImportGradesFromCsv(path);
             break;
         default:
              Console.WriteLine("Invalid option.");

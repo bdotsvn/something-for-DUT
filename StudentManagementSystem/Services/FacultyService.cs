@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Linq;
 using StudentManagementSystem.Interfaces;
 using StudentManagementSystem.Models;
@@ -38,6 +39,55 @@ namespace StudentManagementSystem.Services
             {
                 Console.WriteLine("Enrollment not found.");
             }
+        }
+
+        public void ImportGradesFromCsv(string filePath)
+        {
+             if (!File.Exists(filePath))
+            {
+                Console.WriteLine("File not found.");
+                return;
+            }
+
+            var lines = File.ReadAllLines(filePath);
+            var dataLines = lines.Skip(1);
+
+            // Using PLINQ to parse lines
+            var gradeEntries = dataLines.AsParallel().Select(line =>
+            {
+                var parts = line.Split(',');
+                // Format: StudentId,SubjectId,Score
+                if (parts.Length >= 3 &&
+                    int.TryParse(parts[0], out int sid) &&
+                    int.TryParse(parts[1], out int subId) &&
+                    double.TryParse(parts[2], out double score))
+                {
+                    return new { StudentId = sid, SubjectId = subId, Score = score };
+                }
+                return null;
+            }).Where(x => x != null).ToList();
+
+            int updatedCount = 0;
+            foreach (var entry in gradeEntries)
+            {
+                var enrollment = _enrollmentRepository.Query()
+                    .FirstOrDefault(e => e.StudentId == entry!.StudentId && e.SubjectId == entry.SubjectId);
+
+                if (enrollment != null)
+                {
+                    enrollment.Score = entry.Score;
+                    updatedCount++;
+                }
+                else
+                {
+                    // Optionally create enrollment if it doesn't exist?
+                    // "Admin assigns student to subject" is the rule.
+                    // But if Faculty has a grade list, maybe they should be able to ensure enrollment?
+                    // Strict rule: Faculty only updates grades.
+                    Console.WriteLine($"Enrollment not found for Student {entry!.StudentId} in Subject {entry.SubjectId}. Skipping.");
+                }
+            }
+            Console.WriteLine($"Updated grades for {updatedCount} enrollments.");
         }
 
         public void ListStudentsInSubject(int subjectId)
