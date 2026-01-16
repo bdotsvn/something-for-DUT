@@ -1,0 +1,6 @@
+Id,Username,Password,FullName,StudentCode,Email
+10,alice,pass123,Alice Wonderland,SV010,alice@example.com
+11,bob,pass456,Bob Builder,SV011,bob@example.com
+12,charlie,pass789,Charlie Chocolate,SV012,charlie@example.com
+13,david,secr3t,David Goliath,SV013,david@example.com
+14,eve,hacker,Eve Spy,SV014,eve@example.com
